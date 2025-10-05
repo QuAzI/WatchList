@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "URL Checker",
+  "version": "1.1",
+  "description": "Автоматически проверяет, есть ли текущая ссылка в моём сервисе.",
+  "permissions": ["tabs", "activeTab", "storage"],
+  "host_permissions": [
+    "https://animevost.org/*",
+    "https://animevost.am/*",
+    "https://*.vost.pw/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-gray.png",
+      "48": "icons/icon-gray.png"
+    },
+    "default_title": "Проверка URL"
+  }
+}

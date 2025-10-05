@@ -1,0 +1,29 @@
+@WatchList.Server_HostAddress = http://localhost:5165/api
+
+GET {{WatchList.Server_HostAddress}}/links/
+Accept: application/json
+
+###
+
+GET {{WatchList.Server_HostAddress}}/links/check?url=https%3A%2F%2Fmy.super.puper.local%2Ftest
+Accept: application/json
+
+###
+
+POST {{WatchList.Server_HostAddress}}/links/check
+Accept: application/json
+Content-Type: application/json
+
+{
+    "url": "https://my.super.puper.local/test2" 
+}
+
+###
+
+POST {{WatchList.Server_HostAddress}}/links/add
+Accept: application/json
+Content-Type: application/json
+
+{
+    "url": "https://my.super.puper.local/test3" 
+}
