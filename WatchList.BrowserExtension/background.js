@@ -1,5 +1,5 @@
 // URL вашего API:
-const API_URL = "http://localhost:5165/api/links/check?url=";
+const API_URL = "http://localhost:5165/api/links";
 
 // Кэш, чтобы не спамить запросами при переключении вкладок
 const cache = new Map();
@@ -15,7 +15,7 @@ async function checkUrl(url) {
   }
 
   try {
-    const res = await fetch(API_URL + encodeURIComponent(url));
+    const res = await fetch(API_URL + '/check?url=' + encodeURIComponent(url));
     const data = await res.json();
     const exists = data.status === 'exists';
 
@@ -56,3 +56,45 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     checkActiveTab();
   }
 });
+
+// Слушатель сообщений от popup.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "add-url") {
+    addUrl(message.url).then((exists) => {
+      sendResponse({ exists });
+      updateIcon(message.tab_id, exists);
+    });
+
+    // ВАЖНО: вернуть true, чтобы оставить канал ответа открытым
+    return true;
+  }
+});
+
+async function addUrl(url) {
+  if (!url || !url.startsWith("http")) return null;
+
+  try {
+      const postData = {
+        url
+      };
+      const response = await fetch(API_URL + '/add', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      });
+      const data = await response.json();
+
+      if (data.status === 'saved' || data.status === 'exists') {
+        cache.set(url, { result: true, time: Date.now() });
+        return true;
+      } else {
+        console.warn(`Can't add url: `, data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return false;
+}

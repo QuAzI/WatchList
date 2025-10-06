@@ -1,20 +1,24 @@
-document.getElementById("check").addEventListener("click", async () => {
+document.getElementById("add").addEventListener("click", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = tab.url;
 
-  document.getElementById("status").textContent = "Проверяю...";
+  let statusElement = document.getElementById("status");
+  statusElement.textContent = "Добавляю...";
 
-  try {
-    const response = await fetch(`http://localhost:5165/api/links/check?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-
-    if (data.exists) {
-      document.getElementById("status").textContent = "✅ Найдено в сервисе!";
-    } else {
-      document.getElementById("status").textContent = "❌ Не найдено.";
+  chrome.runtime.sendMessage({ 
+    type: "add-url",
+    url,
+    tab_id: tab.id
+  }, (response) => {
+    if (!response) {
+      statusElement.textContent = "⚠️ Ошибка связи с background";
+      return;
     }
-  } catch (e) {
-    document.getElementById("status").textContent = "⚠️ Ошибка запроса.";
-    console.error(e);
-  }
+
+    if (response.exists) {
+      statusElement.textContent = "✅ Добавлено";
+    } else {
+      statusElement.textContent = "❌ Ошибка добавления";
+    }
+  });
 });

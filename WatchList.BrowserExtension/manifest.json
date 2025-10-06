@@ -15,10 +15,11 @@
     ]
   },
   "action": {
+    "default_title": "Проверка URL",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-gray.png",
       "48": "icons/icon-gray.png"
-    },
-    "default_title": "Проверка URL"
+    }    
   }
 }
