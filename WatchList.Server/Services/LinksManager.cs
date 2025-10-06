@@ -1,4 +1,6 @@
-﻿namespace WatchList.Server.Services
+﻿using System.Text;
+
+namespace WatchList.Server.Services
 {
     public class LinksManager : ILinksManager
     {
@@ -43,7 +45,7 @@
                 {
                     using (var writer = new StreamWriter(fileStream))
                     {
-                        writer.WriteLine(url);
+                        writer.Write("\n" + url);
                         storedLinks.Add(url);
                         return true;
                     }
@@ -51,6 +53,23 @@
             }
 
             return false;
+        }
+
+        public void RemoveLink(string url)
+        {
+            if (!string.IsNullOrWhiteSpace(url) &&
+                storedLinks.Remove(url))
+            {
+                using (var fileStream = File.Open(filename, FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    using (var writer = new StreamWriter(fileStream))
+                    {
+                        var builder = new StringBuilder(storedLinks.Count);
+                        builder.AppendJoin("\n", storedLinks);
+                        writer.Write(builder.ToString());
+                    }
+                }
+            }
         }
     }
 }

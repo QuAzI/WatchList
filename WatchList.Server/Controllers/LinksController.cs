@@ -33,5 +33,12 @@ namespace WatchList.Server.Controllers
         public ActionResult Add([FromBody]Link link) => linksManager.AddLink(link.Url)
             ? Ok(new { Status = "saved" })
             : Ok(new { Status = "exists" });
+
+        [HttpPost("remove", Name = "RemoveLink")]
+        public ActionResult Remove([FromBody]Link link)
+        {
+            linksManager.RemoveLink(link.Url);
+            return Ok(new { Status = "removed" });
+        }
     }
 }

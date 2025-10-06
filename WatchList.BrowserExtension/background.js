@@ -59,10 +59,31 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Слушатель сообщений от popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "check-url") {
+    checkUrl(message.url).then((exists) => {
+      sendResponse({ exists });
+      updateIcon(message.tab_id, exists);
+    });
+
+    // ВАЖНО: вернуть true, чтобы оставить канал ответа открытым
+    return true;
+  }
   if (message.type === "add-url") {
     addUrl(message.url).then((exists) => {
       sendResponse({ exists });
       updateIcon(message.tab_id, exists);
+    });
+
+    // ВАЖНО: вернуть true, чтобы оставить канал ответа открытым
+    return true;
+  }
+  if (message.type === "remove-url") {
+    removeUrl(message.url).then((removed) => {
+      sendResponse({ removed });
+      if (removed) {
+        updateIcon(message.tab_id, false);
+        cache.set(message.url, { result: false, time: Date.now() });
+      }
     });
 
     // ВАЖНО: вернуть true, чтобы оставить канал ответа открытым
@@ -92,6 +113,31 @@ async function addUrl(url) {
       } else {
         console.warn(`Can't add url: `, data);
       }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return false;
+}
+
+async function removeUrl(url) {
+  if (!url || !url.startsWith("http")) return null;
+
+  try {
+      const postData = {
+        url
+      };
+      const response = await fetch(API_URL + '/remove', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      });
+      const data = await response.json();
+      console.warn(`Resp: `, response.status, data);
+
+      return true
     } catch (e) {
       console.error(e);
     }
